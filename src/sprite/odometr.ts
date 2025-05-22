@@ -50,7 +50,16 @@ export class Odometer extends Container implements ISpinner {
     }
 
     public spin(target: number, duration: number = DEFAULT_ANIMATION_DURATION): void {
-        this._startValue = this._currentValue;
+        if (this._mode === 'instant') {
+            this.setValue(target);
+            return;
+        }
+
+        if (target === this._targetValue) {
+            this._isAnimating = false;
+            return;
+        }
+        this._startValue = 0;
         this._targetValue = target;
         this._animationDuration = duration;
         this._animationStartTime = performance.now();
@@ -58,11 +67,9 @@ export class Odometer extends Container implements ISpinner {
     }
 
     public complete(): void {
-        if (this._isAnimating) {
-            this._currentValue = this._targetValue;
-            this._isAnimating = false;
-            this._render();
-        }
+        this._currentValue = this._targetValue;
+        this._isAnimating = false;
+        this._render();
     }
 
     public stop(): void {
@@ -183,15 +190,21 @@ export class Odometer extends Container implements ISpinner {
         );
     }
 
-    private _updateCurrentValue(progress: number): void {
-        switch (this._mode) {
-            case 'instant':
-                this._currentValue = this._targetValue;
-                break;
+    public setValue(value: number): void {
+        this._currentValue = value;
+        this._targetValue = value;
+        this._isAnimating = false;
+        this._render();
+    }
 
+    private _updateCurrentValue(progress: number): void {
+        if (this._mode === 'instant') return;
+
+        switch (this._mode) {
             case 'replacement':
-                this._currentValue = this._startValue +
-                    (this._targetValue - this._startValue) * progress;
+                const range = this._targetValue - this._startValue;
+                const randomFactor = Math.random()/2 * range;
+                this._currentValue = this._startValue + randomFactor;
                 break;
 
             case 'ascending':
@@ -231,7 +244,6 @@ export class Odometer extends Container implements ISpinner {
                 this._animateSingleDigit(
                     digitIndex++,
                     char,
-                    i,
                     progress,
                     isDecimalPart
                 );
@@ -242,13 +254,12 @@ export class Odometer extends Container implements ISpinner {
     private _animateSingleDigit(
         digitIndex: number,
         char: string,
-        position: number,
         progress: number,
         isDecimalPart: boolean
     ): void {
         const container = this._digitContainers[digitIndex];
         const targetNum = parseInt(char);
-        const startNum = parseInt(this._formatNumber(this._startValue)[position]) || 0;
+        const startNum = 0;
         const easedProgress = this._easeOutQuad(progress);
 
         if (!isDecimalPart) {
@@ -268,9 +279,7 @@ export class Odometer extends Container implements ISpinner {
     }
 
     private _calculateDistance(from: number, to: number): number {
-        const direct = to - from;
-        const wrapAround = (to > from) ? (to - from - 10) : (to - from + 10);
-        return Math.abs(direct) < Math.abs(wrapAround) ? direct : wrapAround;
+        return to - from;
     }
 
     private _isDigit(char: string): boolean {

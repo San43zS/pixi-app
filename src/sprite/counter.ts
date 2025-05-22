@@ -47,6 +47,10 @@ export class Counter extends Container implements ISpinner {
     }
 
     public spin(target: number, duration: number = DEFAULT_ANIMATION_DURATION): void {
+        if (target === this._targetValue) {
+            this._isAnimating = false;
+            return;
+        }
         this._startValue = this._currentValue;
         this._targetValue = target;
         this._animationDuration = duration;
@@ -161,10 +165,10 @@ export class Counter extends Container implements ISpinner {
             case 'instant':
                 this._currentValue = this._targetValue;
                 break;
-
             case 'replacement':
-                this._currentValue = this._startValue +
-                    (this._targetValue - this._startValue) * progress;
+                    const range = this._targetValue - this._startValue;
+                    const randomFactor = Math.random()/2 * range;
+                    this._currentValue = this._startValue + randomFactor;
                 break;
 
             case 'ascending':

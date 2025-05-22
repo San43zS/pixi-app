@@ -38,6 +38,7 @@ export function setupHTMLControls(odometer: Odometer, spinner: Counter) {
             decimalsNumber: parseInt(decimalsInput.value) || DEFAULT_VALUES.decimals,
             mode: (mode.value as AnimationMode) || DEFAULT_VALUES.mode
         };
+        console.log(formatOptions.mode)
 
         const value = parseFloat(valueInput.value) || DEFAULT_VALUES.value;
         const duration = parseInt(durationInput.value) || DEFAULT_VALUES.duration;
