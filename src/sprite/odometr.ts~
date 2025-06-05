@@ -259,7 +259,7 @@ export class Odometer extends Container implements ISpinner {
 
             const digitWeight = digitCount - 1 - i;
 
-            const digitProgress = Math.max(0, progress * 10 - digitWeight);
+            const digitProgress = Math.max(0, progress * 5 - digitWeight);
             const clampedProgress = Math.min(digitProgress, 1);
 
             if (clampedProgress <= 0) {
